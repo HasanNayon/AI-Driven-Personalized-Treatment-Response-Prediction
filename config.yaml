@@ -1,0 +1,67 @@
+# Mental Health Treatment Response Prediction System Configuration
+
+# Model Paths
+models:
+  llm_path: "LLM Fine tuning model"
+  xgboost_path: "LLM fine Tuniing xgboost model/xgboost_llm_enhanced.pkl"
+  checkpoint_path: "checkpoint-1500"
+
+# Dataset Paths
+data:
+  patient_profiles: "Dataset/processed/patient_profiles.csv"
+  therapy_notes: "Dataset/processed/therapy_notes.csv"
+  digital_chats: "Dataset/processed/digital_therapy_chats.csv"
+  reddit_posts: "Dataset/processed/patient_reddit_posts.csv"
+
+# Model Parameters
+llm:
+  model_name: "meta-llama/Llama-3.2-1B"
+  max_length: 512
+  batch_size: 8
+  device: "cuda"  # or "cpu"
+
+xgboost:
+  n_estimators: 100
+  max_depth: 6
+  learning_rate: 0.1
+
+# Feature Engineering
+features:
+  use_therapy_notes: true
+  use_digital_chats: true
+  use_reddit_posts: true
+  use_clinical_features: true
+  embedding_dim: 768
+
+# Treatment Types
+treatments:
+  - CBT
+  - Medication
+  - Digital_Therapy
+  - CBT+Medication
+  - CBT+Digital
+
+# Severity Levels
+severity_levels:
+  - mild-moderate
+  - moderate
+  - moderate-severe
+  - severe
+
+# Response Categories
+response_categories:
+  - responder
+  - partial
+  - non-responder
+
+# API Configuration
+api:
+  host: "0.0.0.0"
+  port: 5000
+  debug: true
+
+# Logging
+logging:
+  level: "INFO"
+  format: "{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}"
+  file: "logs/app.log"
