@@ -1,8 +1,3 @@
-"""
-Data Preprocessing
-Feature engineering and data preparation for model training/inference
-"""
-
 import pandas as pd
 import numpy as np
 from typing import Dict, List, Tuple, Optional
@@ -13,25 +8,12 @@ logger = get_logger(__name__)
 
 
 class DataPreprocessor:
-    """Preprocess and engineer features for mental health prediction"""
-    
     def __init__(self):
-        """Initialize preprocessor with encoders and scalers"""
         self.label_encoders = {}
         self.scaler = StandardScaler()
         self.is_fitted = False
     
     def prepare_clinical_features(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Prepare clinical/demographic features
-        
-        Args:
-            df: Patient profiles DataFrame
-            
-        Returns:
-            DataFrame with engineered clinical features
-        """
-        logger.info("Preparing clinical features...")
         
         df = df.copy()
         
@@ -66,7 +48,6 @@ class DataPreprocessor:
         }
         df['severity_numeric'] = df['baseline_severity'].map(severity_map)
         
-        logger.info(f"Clinical features prepared: {df.shape[1]} columns")
         return df
     
     def aggregate_text_features(
@@ -76,19 +57,6 @@ class DataPreprocessor:
         digital_chats: pd.DataFrame,
         reddit_posts: pd.DataFrame
     ) -> pd.DataFrame:
-        """
-        Aggregate text data for each patient
-        
-        Args:
-            patient_df: Patient profiles
-            therapy_notes: Therapy session notes
-            digital_chats: Digital therapy chats
-            reddit_posts: Reddit posts
-            
-        Returns:
-            DataFrame with aggregated text features
-        """
-        logger.info("Aggregating text features...")
         
         text_features = []
         
@@ -134,8 +102,6 @@ class DataPreprocessor:
             })
         
         text_df = pd.DataFrame(text_features)
-        logger.info(f"Text features aggregated for {len(text_df)} patients")
-        
         return text_df
     
     def encode_categorical_features(
@@ -144,17 +110,6 @@ class DataPreprocessor:
         categorical_cols: List[str],
         fit: bool = True
     ) -> pd.DataFrame:
-        """
-        Encode categorical features
-        
-        Args:
-            df: DataFrame with categorical columns
-            categorical_cols: List of columns to encode
-            fit: Whether to fit encoders (True for training, False for inference)
-            
-        Returns:
-            DataFrame with encoded features
-        """
         df = df.copy()
         
         for col in categorical_cols:
@@ -186,17 +141,6 @@ class DataPreprocessor:
         numerical_cols: List[str],
         fit: bool = True
     ) -> pd.DataFrame:
-        """
-        Scale numerical features
-        
-        Args:
-            df: DataFrame with numerical columns
-            numerical_cols: List of columns to scale
-            fit: Whether to fit scaler
-            
-        Returns:
-            DataFrame with scaled features
-        """
         df = df.copy()
         
         # Filter to existing columns
@@ -220,19 +164,6 @@ class DataPreprocessor:
         digital_chats: pd.DataFrame = None,
         reddit_posts: pd.DataFrame = None
     ) -> Tuple[pd.DataFrame, pd.Series]:
-        """
-        Complete preprocessing pipeline for training
-        
-        Args:
-            patient_df: Patient profiles
-            therapy_notes: Therapy session notes (optional)
-            digital_chats: Digital therapy chats (optional)
-            reddit_posts: Reddit posts (optional)
-            
-        Returns:
-            Tuple of (features_df, target_series)
-        """
-        logger.info("Starting training data preparation...")
         
         # Prepare clinical features
         df = self.prepare_clinical_features(patient_df)
@@ -264,21 +195,9 @@ class DataPreprocessor:
         df = self.scale_numerical_features(df, numerical_cols, fit=True)
         
         self.is_fitted = True
-        logger.info(f"Training data prepared: {df.shape}")
-        
         return df, target
     
     def prepare_inference_data(self, patient_data: Dict[str, pd.DataFrame]) -> pd.DataFrame:
-        """
-        Prepare data for inference
-        
-        Args:
-            patient_data: Dictionary with patient data from all sources
-            
-        Returns:
-            Preprocessed features DataFrame
-        """
-        logger.info("Preparing inference data...")
         
         if not self.is_fitted:
             logger.warning("Preprocessor not fitted. Encoders/scalers may not be available.")

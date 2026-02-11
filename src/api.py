@@ -1,8 +1,3 @@
-"""
-Flask API for Mental Health Treatment Response Prediction
-RESTful API endpoints for model inference
-"""
-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flasgger import Swagger, swag_from
@@ -28,7 +23,7 @@ app.config['SWAGGER'] = {
     'title': 'Mental Health Treatment Response API',
     'uiversion': 3,
     'version': '1.0.0',
-    'description': 'AI-driven decision support system for youth mental health treatment prediction'
+    'description': 'API for youth mental health treatment response prediction'
 }
 swagger = Swagger(app)
 
@@ -397,7 +392,6 @@ def get_severity_levels():
               type: array
               items:
                 type: string
-    """
     severity_levels = config.get('severity_levels', [])
     return jsonify({'severity_levels': severity_levels}), 200
 
@@ -451,14 +445,11 @@ def internal_error(error):
 
 
 def run_api():
-    """Run the Flask API server"""
     host = config.get('api.host', '0.0.0.0')
     port = config.get('api.port', 5000)
     debug = config.get('api.debug', True)
     
-    logger.info(f"Starting API server on {host}:{port}")
-    logger.info(f"API documentation available at http://{host}:{port}/apidocs")
-    
+    logger.info(f"Starting API on {host}:{port}")
     app.run(host=host, port=port, debug=debug)
 
 

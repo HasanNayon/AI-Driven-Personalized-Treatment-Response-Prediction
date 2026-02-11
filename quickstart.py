@@ -1,22 +1,15 @@
-"""
-Quick Start Script
-Automated setup and testing for the Mental Health Treatment Response Prediction System
-"""
-
 import subprocess
 import sys
 import os
 from pathlib import Path
 
 def print_header(text):
-    """Print formatted header"""
-    print("\n" + "="*70)
+    print("\n" + "-"*50)
     print(f"  {text}")
-    print("="*70 + "\n")
+    print("-"*50 + "\n")
 
 def run_command(cmd, description, check=True):
-    """Run a command and print status"""
-    print(f"→ {description}...")
+    print(f"  {description}...")
     try:
         result = subprocess.run(
             cmd,
@@ -26,33 +19,31 @@ def run_command(cmd, description, check=True):
             check=check
         )
         if result.returncode == 0:
-            print(f"✓ {description} - SUCCESS\n")
+            print(f"  {description} - OK\n")
             return True
         else:
-            print(f"✗ {description} - FAILED")
+            print(f"  {description} - FAILED")
             if result.stderr:
                 print(f"Error: {result.stderr[:200]}\n")
             return False
     except Exception as e:
-        print(f"✗ {description} - FAILED")
+        print(f"  {description} - FAILED")
         print(f"Error: {str(e)[:200]}\n")
         return False
 
 def check_python_version():
-    """Check Python version"""
     print_header("Checking Python Version")
     version = sys.version_info
     print(f"Python version: {version.major}.{version.minor}.{version.micro}")
     
     if version.major >= 3 and version.minor >= 8:
-        print("✓ Python version is compatible (3.8+)\n")
+        print("  Python version OK (3.8+)\n")
         return True
     else:
-        print("✗ Python version must be 3.8 or higher\n")
+        print("  Python 3.8+ required\n")
         return False
 
 def check_files():
-    """Check if required files exist"""
     print_header("Checking Required Files")
     
     required_files = [
@@ -68,16 +59,15 @@ def check_files():
     all_exist = True
     for file_path in required_files:
         if Path(file_path).exists():
-            print(f"✓ {file_path}")
+            print(f"  [ok] {file_path}")
         else:
-            print(f"✗ {file_path} - NOT FOUND")
+            print(f"  [missing] {file_path}")
             all_exist = False
     
     print()
     return all_exist
 
 def install_dependencies():
-    """Install Python dependencies"""
     print_header("Installing Dependencies")
     
     print("This may take 5-15 minutes depending on your internet connection...\n")
@@ -89,41 +79,37 @@ def install_dependencies():
     )
 
 def create_directories():
-    """Create necessary directories"""
     print_header("Creating Directories")
     
     directories = ['logs', 'outputs', 'outputs/examples', 'outputs/visualizations']
     
     for directory in directories:
         Path(directory).mkdir(exist_ok=True, parents=True)
-        print(f"✓ Created {directory}")
+        print(f"  [ok] {directory}")
     
     print()
     return True
 
 def copy_env_file():
-    """Copy environment template"""
     print_header("Configuring Environment")
     
     env_example = Path('.env.example')
     env_file = Path('.env')
     
     if env_file.exists():
-        print("✓ .env file already exists")
+        print("  .env file already exists")
         return True
     
     if env_example.exists():
         import shutil
         shutil.copy(env_example, env_file)
-        print("✓ Created .env from .env.example")
-        print("  You can edit .env to customize settings\n")
+        print("  Created .env from .env.example\n")
         return True
     else:
-        print("✗ .env.example not found")
+        print("  .env.example not found")
         return False
 
 def test_imports():
-    """Test if key packages can be imported"""
     print_header("Testing Package Imports")
     
     packages = [
@@ -139,16 +125,15 @@ def test_imports():
     for package, name in packages:
         try:
             __import__(package)
-            print(f"✓ {name}")
+            print(f"  [ok] {name}")
         except ImportError:
-            print(f"✗ {name} - IMPORT FAILED")
+            print(f"  [fail] {name}")
             all_imported = False
     
     print()
     return all_imported
 
 def run_simple_test():
-    """Run a simple functionality test"""
     print_header("Running Functionality Test")
     
     print("Testing data loading and model initialization...\n")
@@ -177,30 +162,19 @@ print("\\n✓ Basic functionality test passed!")
     )
 
 def show_next_steps():
-    """Display next steps to user"""
-    print_header("Setup Complete!")
+    print_header("Setup Complete")
     
-    print("🎉 The Mental Health Treatment Response Prediction System is ready!\n")
-    print("Next Steps:\n")
-    print("1. Run examples to test the system:")
-    print("   python examples.py\n")
-    print("2. Try the command-line interface:")
-    print("   python app.py predict-db --patient-id P0001\n")
-    print("3. Start the API server:")
-    print("   python app.py api")
-    print("   Then visit: http://localhost:5000/apidocs\n")
-    print("4. Read the documentation:")
-    print("   - README.md - Main documentation")
-    print("   - SETUP_GUIDE.md - Detailed setup guide")
-    print("   - API_DOCUMENTATION.md - API usage\n")
-    print("="*70 + "\n")
+    print("Next steps:\n")
+    print("  python examples.py              # run examples")
+    print("  python app.py predict-db --patient-id P0001  # predict from db")
+    print("  python app.py api               # start API server")
+    print("  python web_interface.py          # start web UI")
+    print()
 
 def main():
-    """Main setup workflow"""
-    print("\n" + "="*70)
-    print("  Mental Health Treatment Response Prediction System")
-    print("  Quick Start & Setup Verification")
-    print("="*70 + "\n")
+    print("\n" + "-"*50)
+    print("  Setup Verification")
+    print("-"*50 + "\n")
     
     # Check Python version
     if not check_python_version():
@@ -224,20 +198,18 @@ def main():
     
     if response in ['y', 'yes']:
         if not install_dependencies():
-            print("\n⚠️  Dependency installation had some issues.")
-            print("You may need to install packages manually:")
-            print("  pip install -r requirements.txt\n")
+            print("\n  Dependency installation had issues.")
+            print("  Try manually: pip install -r requirements.txt\n")
     
     # Test imports
     if not test_imports():
-        print("\n⚠️  Some packages failed to import.")
-        print("Try running: pip install -r requirements.txt\n")
+        print("\n  Some packages failed to import.")
+        print("  Try: pip install -r requirements.txt\n")
         return False
     
     # Run functionality test
     if not run_simple_test():
-        print("\n⚠️  Functionality test had some issues.")
-        print("The system may still work. Check logs for details.\n")
+        print("\n  Functionality test had issues. Check logs.\n")
     
     # Show next steps
     show_next_steps()

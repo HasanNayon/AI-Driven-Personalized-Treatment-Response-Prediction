@@ -1,8 +1,3 @@
-"""
-Main Application
-Command-line interface for the Mental Health Treatment Response Prediction System
-"""
-
 import argparse
 import sys
 from pathlib import Path
@@ -19,13 +14,10 @@ logger = get_logger(__name__)
 
 
 def predict_patient(args):
-    """Predict treatment response for a single patient"""
-    logger.info("Starting single patient prediction...")
+    logger.info("Running single patient prediction")
     
-    # Initialize components
     model_manager = ModelManager()
     
-    # Build patient info from command line arguments
     patient_info = {
         'patient_id': args.patient_id,
         'age': args.age,
@@ -41,7 +33,6 @@ def predict_patient(args):
         'outcome_gad7': 0   # Placeholder
     }
     
-    # Make prediction
     result = model_manager.predict_single_patient(
         patient_info,
         therapy_notes=args.therapy_notes or "",
@@ -49,11 +40,7 @@ def predict_patient(args):
         reddit_posts=args.reddit_posts or ""
     )
     
-    # Display results
-    print("\n" + "="*60)
-    print(f"TREATMENT RESPONSE PREDICTION REPORT")
-    print("="*60)
-    print(f"Patient ID: {result['patient_id']}")
+    print(f"\nPatient ID: {result['patient_id']}")
     print(f"\nPredicted Response: {result['predicted_response'].upper()}")
     print(f"Confidence: {result['confidence']:.1%}")
     print(f"\nClass Probabilities:")
@@ -61,20 +48,15 @@ def predict_patient(args):
         print(f"  {response:15s}: {prob:.1%}")
     print(f"\nRecommendation:")
     print(f"  {result['recommendation']}")
-    print("="*60 + "\n")
-    
-    logger.info("Prediction completed successfully")
+    print()
 
 
 def predict_from_database(args):
-    """Predict for an existing patient in the database"""
-    logger.info(f"Predicting for patient {args.patient_id} from database...")
+    logger.info(f"Predicting for patient {args.patient_id}")
     
-    # Initialize components
     data_loader = DataLoader()
     preprocessor = DataPreprocessor()
     model_manager = ModelManager()
-    
     # Load patient data
     patient_data = data_loader.get_patient_data(args.patient_id)
     
@@ -82,7 +64,6 @@ def predict_from_database(args):
         logger.error(f"Patient {args.patient_id} not found in database")
         print(f"Error: Patient {args.patient_id} not found")
         return
-    
     # Load all data for fitting preprocessor
     all_data = data_loader.load_all_data()
     preprocessor.prepare_training_data(
@@ -92,23 +73,16 @@ def predict_from_database(args):
         all_data['reddit_posts']
     )
     
-    # Prepare patient data
     processed_data = preprocessor.prepare_inference_data(patient_data)
     
-    # Make prediction
     predictions, probabilities = model_manager.predict(
         processed_data,
         return_probabilities=True
     )
     
-    # Get actual response if available
     actual_response = patient_data['profile']['treatment_response'].values[0]
     
-    # Display results
-    print("\n" + "="*60)
-    print(f"TREATMENT RESPONSE PREDICTION REPORT")
-    print("="*60)
-    print(f"Patient ID: {args.patient_id}")
+    print(f"\nPatient ID: {args.patient_id}")
     print(f"\nPredicted Response: {predictions[0].upper()}")
     print(f"Actual Response: {actual_response.upper()}")
     print(f"Match: {'✓ YES' if predictions[0] == actual_response else '✗ NO'}")
@@ -121,25 +95,19 @@ def predict_from_database(args):
     }
     for response, prob in prob_dict.items():
         print(f"  {response:15s}: {prob:.1%}")
-    print("="*60 + "\n")
-    
-    logger.info("Prediction completed successfully")
+    print()
 
 
 def evaluate_model(args):
-    """Evaluate model performance on test data"""
-    logger.info("Starting model evaluation...")
+    logger.info("Running model evaluation")
     
-    # Initialize components
     data_loader = DataLoader()
     preprocessor = DataPreprocessor()
     model_manager = ModelManager()
     evaluator = ModelEvaluator(output_dir=args.output_dir)
     
-    # Load all data
     all_data = data_loader.load_all_data()
     
-    # Prepare data
     processed_data, target = preprocessor.prepare_training_data(
         all_data['patient_profiles'],
         all_data['therapy_notes'],
@@ -152,10 +120,8 @@ def evaluate_model(args):
     le = LabelEncoder()
     y = le.fit_transform(target)
     
-    # Prepare features
     X, feature_names = model_manager.prepare_features(processed_data)
     
-    # Split data (simple split for demonstration)
     from sklearn.model_selection import train_test_split
     X_train, X_test, y_train, y_test, idx_train, idx_test = train_test_split(
         X, y, range(len(y)), test_size=0.2, random_state=42, stratify=y
@@ -163,7 +129,6 @@ def evaluate_model(args):
     
     patient_test = all_data['patient_profiles'].iloc[list(idx_test)]
     
-    # Generate evaluation report
     report = evaluator.generate_evaluation_report(
         model_manager.xgboost_model,
         X_test,
@@ -173,43 +138,32 @@ def evaluate_model(args):
         class_names=['non-responder', 'partial', 'responder']
     )
     
-    print("\n" + "="*60)
-    print("MODEL EVALUATION SUMMARY")
-    print("="*60)
-    print(f"Test Set Size: {len(y_test)}")
+    print(f"\nTest Set Size: {len(y_test)}")
     print(f"Accuracy: {report['overall_metrics']['accuracy']:.1%}")
     print(f"Balanced Accuracy: {report['overall_metrics']['balanced_accuracy']:.1%}")
     print(f"F1 Score (weighted): {report['overall_metrics']['f1_weighted']:.1%}")
     if report['overall_metrics']['roc_auc_weighted']:
         print(f"ROC AUC (weighted): {report['overall_metrics']['roc_auc_weighted']:.1%}")
     print(f"\nOutputs saved to: {args.output_dir}")
-    print("="*60 + "\n")
     
-    logger.info("Evaluation completed successfully")
+    logger.info("Evaluation done")
 
 
 def start_api_server(args):
-    """Start the Flask API server"""
-    logger.info("Starting API server...")
     run_api()
 
 
 def batch_predict(args):
-    """Batch prediction from CSV file"""
-    logger.info(f"Running batch predictions from {args.input_file}...")
+    logger.info(f"Batch predictions from {args.input_file}")
     
     import pandas as pd
     
-    # Load input CSV
     input_df = pd.read_csv(args.input_file)
-    logger.info(f"Loaded {len(input_df)} patients for prediction")
     
-    # Initialize components
     preprocessor = DataPreprocessor()
     model_manager = ModelManager()
     
-    # Prepare data
-    # First fit preprocessor on existing data
+    # fit preprocessor on existing data first
     data_loader = DataLoader()
     all_data = data_loader.load_all_data()
     preprocessor.prepare_training_data(
@@ -219,26 +173,21 @@ def batch_predict(args):
         all_data['reddit_posts']
     )
     
-    # Prepare input data
     processed_data = preprocessor.prepare_clinical_features(input_df)
     
-    # Add empty text columns if not present
     if 'combined_text' not in processed_data.columns:
         processed_data['combined_text'] = ''
     
-    # Make predictions
     predictions, probabilities = model_manager.predict(
         processed_data,
         return_probabilities=True
     )
-    
     # Add predictions to dataframe
     input_df['predicted_response'] = predictions
     input_df['confidence'] = probabilities.max(axis=1)
     input_df['prob_non_responder'] = probabilities[:, 0]
     input_df['prob_partial'] = probabilities[:, 1]
     input_df['prob_responder'] = probabilities[:, 2]
-    
     # Save results
     output_file = args.output_file or args.input_file.replace('.csv', '_predictions.csv')
     input_df.to_csv(output_file, index=False)
@@ -248,11 +197,10 @@ def batch_predict(args):
     print(f"Total patients: {len(input_df)}")
     print(f"Predictions: {dict(pd.Series(predictions).value_counts())}")
     
-    logger.info(f"Batch predictions saved to {output_file}")
+    logger.info(f"Saved predictions to {output_file}")
 
 
 def main():
-    """Main entry point"""
     parser = argparse.ArgumentParser(
         description="Mental Health Treatment Response Prediction System",
         formatter_class=argparse.RawDescriptionHelpFormatter
@@ -305,7 +253,7 @@ def main():
         parser.print_help()
         sys.exit(1)
     
-    # Route to appropriate function
+    # Route to function
     try:
         if args.command == 'predict':
             predict_patient(args)

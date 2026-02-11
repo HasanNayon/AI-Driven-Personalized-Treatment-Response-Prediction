@@ -68,3 +68,7 @@ htmlcov/
 
 # OS
 Thumbs.db
+# Paper materials (keep local only)
+paper_materials/
+paper_submission_package/
+paper_submission_package.zip

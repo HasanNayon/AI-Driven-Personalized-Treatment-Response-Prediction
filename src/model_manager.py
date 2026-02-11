@@ -1,8 +1,3 @@
-"""
-Model Manager
-Handles loading and inference of XGBoost and LLM models
-"""
-
 import joblib
 import numpy as np
 import pandas as pd
@@ -17,10 +12,7 @@ logger = get_logger(__name__)
 
 
 class ModelManager:
-    """Manage ML models for treatment response prediction"""
-    
     def __init__(self):
-        """Initialize model manager"""
         self.xgboost_model = None
         self.llm_extractor = None
         self.preprocessor = DataPreprocessor()
@@ -33,7 +25,6 @@ class ModelManager:
         self.load_models()
     
     def load_models(self):
-        """Load XGBoost and LLM models"""
         logger.info("Loading models...")
         
         # Load XGBoost model
@@ -42,25 +33,19 @@ class ModelManager:
             logger.info(f"Loading XGBoost model from {xgb_path}")
             loaded_obj = joblib.load(xgb_path)
             
-            # Handle case where model is stored in a dictionary
             if isinstance(loaded_obj, dict):
-                logger.info(f"Loaded object is a dictionary with keys: {list(loaded_obj.keys())}")
-                # Try to extract the model from common dictionary keys
+                logger.info(f"Model dict keys: {list(loaded_obj.keys())}")
                 if 'model' in loaded_obj:
                     self.xgboost_model = loaded_obj['model']
-                    logger.info("Extracted model from 'model' key")
                 elif 'xgboost_model' in loaded_obj:
                     self.xgboost_model = loaded_obj['xgboost_model']
-                    logger.info("Extracted model from 'xgboost_model' key")
                 elif 'clf' in loaded_obj:
                     self.xgboost_model = loaded_obj['clf']
-                    logger.info("Extracted model from 'clf' key")
                 else:
-                    # If multiple keys, try to find the model by type
                     for key, value in loaded_obj.items():
                         if hasattr(value, 'predict') and hasattr(value, 'predict_proba'):
                             self.xgboost_model = value
-                            logger.info(f"Extracted model from dictionary key: {key}")
+                            logger.info(f"Found model in key: {key}")
                             break
                     if self.xgboost_model is None:
                         raise RuntimeError(f"Could not find model in dictionary. Available keys: {list(loaded_obj.keys())}")
@@ -68,11 +53,9 @@ class ModelManager:
                 # Store feature names if available
                 if 'feature_names' in loaded_obj:
                     self.feature_names = loaded_obj['feature_names']
-                    logger.info(f"Loaded {len(self.feature_names)} feature names")
             else:
                 self.xgboost_model = loaded_obj
             
-            # Verify model has predict method
             if not hasattr(self.xgboost_model, 'predict'):
                 raise RuntimeError(f"Loaded object does not have 'predict' method. Type: {type(self.xgboost_model)}")
             
@@ -81,11 +64,9 @@ class ModelManager:
             logger.error(f"Error loading XGBoost model: {e}")
             raise
         
-        # Load LLM feature extractor
         try:
             logger.info("Initializing LLM feature extractor...")
             self.llm_extractor = LLMFeatureExtractor()
-            logger.info("LLM feature extractor initialized")
         except Exception as e:
             logger.error(f"Error initializing LLM: {e}")
             logger.warning("LLM feature extraction not available")
@@ -95,17 +76,6 @@ class ModelManager:
         patient_data: pd.DataFrame,
         include_llm_features: bool = True
     ) -> Tuple[np.ndarray, List[str]]:
-        """
-        Prepare complete feature set for prediction
-        
-        Args:
-            patient_data: Preprocessed patient data
-            include_llm_features: Whether to include LLM embeddings
-            
-        Returns:
-            Tuple of (feature_array, feature_names)
-        """
-        logger.info("Preparing features for prediction...")
         
         # Extract clinical features
         clinical_feature_cols = [
@@ -121,30 +91,27 @@ class ModelManager:
         
         feature_names = available_cols.copy()
         
-        # Add LLM embeddings if requested and available
         if include_llm_features and self.llm_extractor is not None:
             if 'combined_text' in patient_data.columns:
-                logger.info("Extracting LLM features from combined text...")
                 llm_features = self.llm_extractor.extract_features_from_dataframe(
                     patient_data, 'combined_text'
                 )
                 
-                # Combine clinical and LLM features
+                # combine clinical + LLM features
                 features = np.hstack([clinical_features, llm_features])
                 
-                # Update feature names
                 embedding_dim = llm_features.shape[1]
                 llm_feature_names = [f'llm_emb_{i}' for i in range(embedding_dim)]
                 feature_names.extend(llm_feature_names)
                 
-                logger.info(f"Combined features shape: {features.shape}")
+                logger.info(f"Features shape: {features.shape}")
             else:
                 logger.warning("No text data available, using only clinical features")
                 features = clinical_features
         else:
             features = clinical_features
         
-        logger.info(f"Feature preparation complete: {features.shape}")
+        logger.info(f"Feature prep done: {features.shape}")
         return features, feature_names
     
     def predict(
@@ -152,16 +119,6 @@ class ModelManager:
         patient_data: pd.DataFrame,
         return_probabilities: bool = False
     ) -> Union[List[str], Tuple[List[str], np.ndarray]]:
-        """
-        Make treatment response predictions
-        
-        Args:
-            patient_data: Preprocessed patient data
-            return_probabilities: Whether to return class probabilities
-            
-        Returns:
-            Predictions (and probabilities if requested)
-        """
         if self.xgboost_model is None:
             raise RuntimeError("XGBoost model not loaded")
         
@@ -170,10 +127,7 @@ class ModelManager:
         # Prepare features
         features, feature_names = self.prepare_features(patient_data)
         
-        # Make predictions
         predictions = self.xgboost_model.predict(features)
-        
-        # Convert numeric predictions to labels
         pred_labels = [self.response_mapping.get(p, 'unknown') for p in predictions]
         
         logger.info(f"Predictions: {dict(pd.Series(pred_labels).value_counts())}")
@@ -191,18 +145,6 @@ class ModelManager:
         digital_chats: str = "",
         reddit_posts: str = ""
     ) -> Dict:
-        """
-        Predict treatment response for a single patient
-        
-        Args:
-            patient_info: Dictionary with patient demographics and clinical data
-            therapy_notes: Therapy session notes (optional)
-            digital_chats: Digital therapy chats (optional)
-            reddit_posts: Reddit posts (optional)
-            
-        Returns:
-            Dictionary with prediction and confidence scores
-        """
         logger.info(f"Predicting for patient: {patient_info.get('patient_id', 'unknown')}")
         
         # Create DataFrame from patient info
@@ -244,17 +186,6 @@ class ModelManager:
         feature_names: List[str],
         top_k: int = 20
     ) -> List[Dict]:
-        """
-        Get feature importance for a single prediction
-        
-        Args:
-            feature_values: Feature values for single instance
-            feature_names: Names of features
-            top_k: Number of top features to return
-            
-        Returns:
-            List of dictionaries with feature names and importance scores
-        """
         if self.xgboost_model is None:
             return []
         
@@ -262,7 +193,7 @@ class ModelManager:
             # Get feature importance from model
             model_importance = self.xgboost_model.feature_importances_
             
-            # Combine with feature values (features with higher values have more impact)
+            # weight by feature value magnitude
             combined_importance = np.abs(feature_values) * model_importance
             
             # Get top features
@@ -288,16 +219,6 @@ class ModelManager:
         prediction: str,
         probabilities: np.ndarray
     ) -> str:
-        """
-        Generate clinical recommendation based on prediction
-        
-        Args:
-            prediction: Predicted response category
-            probabilities: Class probabilities
-            
-        Returns:
-            Recommendation text
-        """
         confidence = float(np.max(probabilities))
         
         recommendations = {
@@ -330,16 +251,6 @@ class ModelManager:
         X_test: np.ndarray,
         y_test: np.ndarray
     ) -> Dict:
-        """
-        Evaluate model performance on test data
-        
-        Args:
-            X_test: Test features
-            y_test: Test labels
-            
-        Returns:
-            Dictionary with evaluation metrics
-        """
         from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
         
         logger.info("Evaluating model performance...")

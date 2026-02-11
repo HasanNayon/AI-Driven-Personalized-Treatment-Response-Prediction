@@ -1,8 +1,3 @@
-"""
-Evaluation Module
-Comprehensive model evaluation and performance metrics
-"""
-
 import numpy as np
 import pandas as pd
 from typing import Dict, Tuple, Optional
@@ -20,15 +15,7 @@ logger = get_logger(__name__)
 
 
 class ModelEvaluator:
-    """Comprehensive model evaluation"""
-    
     def __init__(self, output_dir: str = "outputs"):
-        """
-        Initialize evaluator
-        
-        Args:
-            output_dir: Directory for saving evaluation results
-        """
         self.visualizer = Visualizer(output_dir)
         self.output_dir = self.visualizer.output_dir
         logger.info("Model evaluator initialized")
@@ -40,19 +27,6 @@ class ModelEvaluator:
         y_pred_proba: Optional[np.ndarray] = None,
         class_names: list = None
     ) -> Dict:
-        """
-        Comprehensive evaluation of predictions
-        
-        Args:
-            y_true: True labels
-            y_pred: Predicted labels
-            y_pred_proba: Predicted probabilities (optional)
-            class_names: Names of classes
-            
-        Returns:
-            Dictionary with evaluation metrics
-        """
-        logger.info("Evaluating model predictions...")
         
         if class_names is None:
             class_names = ['non-responder', 'partial', 'responder']
@@ -141,18 +115,6 @@ class ModelEvaluator:
         y: np.ndarray,
         cv: int = 5
     ) -> Dict:
-        """
-        Perform cross-validation
-        
-        Args:
-            model: Trained model with predict method
-            X: Features
-            y: Labels
-            cv: Number of cross-validation folds
-            
-        Returns:
-            Dictionary with cross-validation results
-        """
         logger.info(f"Performing {cv}-fold cross-validation...")
         
         skf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=42)
@@ -181,14 +143,6 @@ class ModelEvaluator:
         feature_names: list,
         top_n: int = 20
     ):
-        """
-        Analyze and visualize feature importance
-        
-        Args:
-            model: Trained model with feature_importances_ attribute
-            feature_names: Names of features
-            top_n: Number of top features to display
-        """
         logger.info("Analyzing feature importance...")
         
         if not hasattr(model, 'feature_importances_'):
@@ -228,18 +182,6 @@ class ModelEvaluator:
         patient_df: pd.DataFrame,
         groupby_col: str
     ) -> Dict:
-        """
-        Evaluate model performance by subgroups
-        
-        Args:
-            y_true: True labels
-            y_pred: Predicted labels
-            patient_df: Patient data with grouping column
-            groupby_col: Column to group by (e.g., 'treatment_type', 'gender')
-            
-        Returns:
-            Dictionary with per-group metrics
-        """
         logger.info(f"Evaluating by subgroup: {groupby_col}")
         
         if groupby_col not in patient_df.columns:
@@ -286,23 +228,7 @@ class ModelEvaluator:
         feature_names: list,
         class_names: list = None
     ) -> Dict:
-        """
-        Generate comprehensive evaluation report
-        
-        Args:
-            model: Trained model
-            X_test: Test features
-            y_test: Test labels
-            patient_df: Patient data
-            feature_names: Names of features
-            class_names: Names of classes
-            
-        Returns:
-            Complete evaluation results dictionary
-        """
-        logger.info("="*50)
-        logger.info("Generating Comprehensive Evaluation Report")
-        logger.info("="*50)
+        logger.info("Generating evaluation report")
         
         # Make predictions
         y_pred = model.predict(X_test)
@@ -344,8 +270,5 @@ class ModelEvaluator:
             json.dump(report, f, indent=2)
         
         logger.info(f"Complete evaluation report saved to {report_path}")
-        logger.info("="*50)
-        logger.info("Evaluation Complete!")
-        logger.info("="*50)
         
         return report

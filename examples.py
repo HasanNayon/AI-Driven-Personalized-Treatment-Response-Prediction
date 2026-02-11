@@ -1,8 +1,3 @@
-"""
-Example Usage Scripts
-Demonstrations of how to use the Mental Health Treatment Response Prediction System
-"""
-
 from src.data_loader import DataLoader
 from src.preprocessing import DataPreprocessor
 from src.model_manager import ModelManager
@@ -13,10 +8,7 @@ logger = get_logger(__name__)
 
 
 def example_1_single_patient_prediction():
-    """Example 1: Predict treatment response for a single patient"""
-    print("\n" + "="*60)
-    print("EXAMPLE 1: Single Patient Prediction")
-    print("="*60 + "\n")
+    print("\n--- Single Patient Prediction ---\n")
     
     # Initialize model manager
     model_manager = ModelManager()
@@ -58,14 +50,11 @@ def example_1_single_patient_prediction():
     for response, prob in result['probabilities'].items():
         print(f"  {response}: {prob:.1%}")
     print(f"\nRecommendation: {result['recommendation']}")
-    print("\n" + "="*60 + "\n")
+    print()
 
 
 def example_2_batch_prediction():
-    """Example 2: Batch prediction for multiple patients"""
-    print("\n" + "="*60)
-    print("EXAMPLE 2: Batch Prediction from Database")
-    print("="*60 + "\n")
+    print("\n--- Batch Prediction ---\n")
     
     # Initialize components
     data_loader = DataLoader()
@@ -94,14 +83,11 @@ def example_2_batch_prediction():
     print(f"\nPrediction distribution:")
     import pandas as pd
     print(pd.Series(predictions).value_counts())
-    print("\n" + "="*60 + "\n")
+    print()
 
 
 def example_3_model_evaluation():
-    """Example 3: Comprehensive model evaluation"""
-    print("\n" + "="*60)
-    print("EXAMPLE 3: Model Evaluation")
-    print("="*60 + "\n")
+    print("\n--- Model Evaluation ---\n")
     
     # Initialize components
     data_loader = DataLoader()
@@ -144,15 +130,12 @@ def example_3_model_evaluation():
     
     print(f"Accuracy: {results['accuracy']:.1%}")
     print(f"F1 Score: {results['f1_weighted']:.1%}")
-    print(f"\nDetailed results saved to outputs/examples/")
-    print("\n" + "="*60 + "\n")
+    print(f"\nResults saved to outputs/examples/")
+    print()
 
 
 def example_4_explain_prediction():
-    """Example 4: Explain prediction with feature importance"""
-    print("\n" + "="*60)
-    print("EXAMPLE 4: Prediction Explanation")
-    print("="*60 + "\n")
+    print("\n--- Prediction Explanation ---\n")
     
     # Initialize components
     data_loader = DataLoader()
@@ -189,14 +172,11 @@ def example_4_explain_prediction():
         for i, feature in enumerate(result['top_features'][:5], 1):
             print(f"  {i}. {feature['feature']}: {feature['value']:.3f} (importance: {feature['importance']:.3f})")
     
-    print("\n" + "="*60 + "\n")
+    print()
 
 
 def example_5_visualizations():
-    """Example 5: Generate visualizations"""
-    print("\n" + "="*60)
-    print("EXAMPLE 5: Generate Visualizations")
-    print("="*60 + "\n")
+    print("\n--- Generating Visualizations ---\n")
     
     from src.visualizer import Visualizer
     
@@ -217,15 +197,14 @@ def example_5_visualizations():
     print("Generating interactive dashboard...")
     visualizer.create_interactive_dashboard(patient_df)
     
-    print(f"\nVisualizations saved to outputs/visualizations/")
+    print(f"\nSaved to outputs/visualizations/")
     print("  - treatment_distribution.png")
     print("  - clinical_scores.png")
-    print("  - dashboard.html (open in browser)")
-    print("\n" + "="*60 + "\n")
+    print("  - dashboard.html")
+    print()
 
 
 def run_all_examples():
-    """Run all examples"""
     try:
         example_1_single_patient_prediction()
         example_2_batch_prediction()
@@ -233,9 +212,7 @@ def run_all_examples():
         example_4_explain_prediction()
         example_5_visualizations()
         
-        print("\n" + "="*60)
-        print("ALL EXAMPLES COMPLETED SUCCESSFULLY!")
-        print("="*60 + "\n")
+        print("\nAll examples completed.")
         
     except Exception as e:
         logger.error(f"Error running examples: {e}")

@@ -1,8 +1,3 @@
-"""
-Visualization Tools
-Generate plots and charts for model evaluation and insights
-"""
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -24,18 +19,9 @@ plt.rcParams['figure.figsize'] = (12, 8)
 
 
 class Visualizer:
-    """Create visualizations for model analysis"""
-    
     def __init__(self, output_dir: str = "outputs"):
-        """
-        Initialize visualizer
-        
-        Args:
-            output_dir: Directory to save plots
-        """
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(exist_ok=True)
-        logger.info(f"Visualizer initialized. Output directory: {self.output_dir}")
     
     def plot_confusion_matrix(
         self,
@@ -45,17 +31,6 @@ class Visualizer:
         title: str = "Confusion Matrix",
         save_name: str = "confusion_matrix.png"
     ):
-        """
-        Plot confusion matrix
-        
-        Args:
-            y_true: True labels
-            y_pred: Predicted labels
-            class_names: Names of classes
-            title: Plot title
-            save_name: Filename to save plot
-        """
-        logger.info(f"Plotting confusion matrix: {title}")
         
         if class_names is None:
             class_names = ['non-responder', 'partial', 'responder']
@@ -79,7 +54,6 @@ class Visualizer:
         
         save_path = self.output_dir / save_name
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        logger.info(f"Confusion matrix saved to {save_path}")
         plt.close()
     
     def plot_feature_importance(
@@ -90,17 +64,6 @@ class Visualizer:
         title: str = "Feature Importance",
         save_name: str = "feature_importance.png"
     ):
-        """
-        Plot feature importance
-        
-        Args:
-            feature_names: Names of features
-            importance_scores: Importance scores
-            top_n: Number of top features to display
-            title: Plot title
-            save_name: Filename to save plot
-        """
-        logger.info(f"Plotting feature importance: {title}")
         
         # Get top N features
         indices = np.argsort(importance_scores)[-top_n:]
@@ -117,7 +80,6 @@ class Visualizer:
         
         save_path = self.output_dir / save_name
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        logger.info(f"Feature importance plot saved to {save_path}")
         plt.close()
     
     def plot_roc_curves(
@@ -128,17 +90,6 @@ class Visualizer:
         title: str = "ROC Curves",
         save_name: str = "roc_curves.png"
     ):
-        """
-        Plot ROC curves for multi-class classification
-        
-        Args:
-            y_true: True labels
-            y_pred_proba: Predicted probabilities
-            class_names: Names of classes
-            title: Plot title
-            save_name: Filename to save plot
-        """
-        logger.info(f"Plotting ROC curves: {title}")
         
         if class_names is None:
             class_names = ['non-responder', 'partial', 'responder']
@@ -174,7 +125,6 @@ class Visualizer:
         
         save_path = self.output_dir / save_name
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        logger.info(f"ROC curves saved to {save_path}")
         plt.close()
     
     def plot_treatment_distribution(
@@ -182,14 +132,6 @@ class Visualizer:
         patient_df: pd.DataFrame,
         save_name: str = "treatment_distribution.png"
     ):
-        """
-        Plot distribution of treatment types and outcomes
-        
-        Args:
-            patient_df: Patient profiles DataFrame
-            save_name: Filename to save plot
-        """
-        logger.info("Plotting treatment distribution")
         
         fig, axes = plt.subplots(2, 2, figsize=(15, 12))
         
@@ -238,7 +180,6 @@ class Visualizer:
         plt.tight_layout()
         save_path = self.output_dir / save_name
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        logger.info(f"Treatment distribution plot saved to {save_path}")
         plt.close()
     
     def plot_clinical_scores(
@@ -246,14 +187,6 @@ class Visualizer:
         patient_df: pd.DataFrame,
         save_name: str = "clinical_scores.png"
     ):
-        """
-        Plot baseline and outcome clinical scores
-        
-        Args:
-            patient_df: Patient profiles DataFrame
-            save_name: Filename to save plot
-        """
-        logger.info("Plotting clinical scores")
         
         fig, axes = plt.subplots(2, 2, figsize=(15, 12))
         
@@ -308,22 +241,13 @@ class Visualizer:
         plt.tight_layout()
         save_path = self.output_dir / save_name
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        logger.info(f"Clinical scores plot saved to {save_path}")
         plt.close()
     
     def create_interactive_dashboard(
         self,
         patient_df: pd.DataFrame,
         save_name: str = "dashboard.html"
-    ):
-        """
-        Create interactive Plotly dashboard
-        
-        Args:
-            patient_df: Patient profiles DataFrame
-            save_name: Filename to save HTML dashboard
-        """
-        logger.info("Creating interactive dashboard")
+    ):)
         
         # Create subplots
         from plotly.subplots import make_subplots
@@ -409,4 +333,3 @@ class Visualizer:
         
         save_path = self.output_dir / save_name
         fig.write_html(str(save_path))
-        logger.info(f"Interactive dashboard saved to {save_path}")

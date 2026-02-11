@@ -1,8 +1,3 @@
-"""
-Simple Web Interface
-HTML-based web interface for the Mental Health Treatment Response Prediction System
-"""
-
 from flask import Flask, render_template_string, request, jsonify
 from src.model_manager import ModelManager
 from src.config import config
@@ -286,8 +281,8 @@ HTML_TEMPLATE = """
 <body>
     <div class="container">
         <header>
-            <h1>🧠 Treatment Response Predictor</h1>
-            <p>AI-Driven Decision Support for Youth Mental Health</p>
+            <h1>Treatment Response Predictor</h1>
+            <p>Decision Support for Youth Mental Health</p>
         </header>
         
         <div class="content">
@@ -380,7 +375,7 @@ HTML_TEMPLATE = """
             <div class="error" id="error"></div>
             
             <div class="result" id="result">
-                <h3>📊 Prediction Results</h3>
+                <h3>Prediction Results</h3>
                 
                 <div class="prediction-box">
                     <div class="prediction-label">Predicted Treatment Response</div>
@@ -481,12 +476,10 @@ HTML_TEMPLATE = """
 
 @app.route('/')
 def index():
-    """Serve the web interface"""
     return render_template_string(HTML_TEMPLATE)
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    """Handle prediction requests"""
     global model_manager
     
     try:
@@ -528,17 +521,12 @@ def predict():
         return jsonify({'error': str(e)}), 500
 
 def run_web_interface():
-    """Run the web interface"""
     host = config.get('api.host', '0.0.0.0')
     port = config.get('api.port', 5000)
     
-    print("\n" + "="*70)
-    print("  Mental Health Treatment Response Prediction System")
-    print("  Web Interface")
-    print("="*70)
-    print(f"\n🌐 Starting web server at http://{host}:{port}")
-    print(f"📱 Open your browser and navigate to: http://localhost:{port}")
-    print("\nPress Ctrl+C to stop the server\n")
+    print(f"\nStarting web server at http://{host}:{port}")
+    print(f"Open your browser: http://localhost:{port}")
+    print("Press Ctrl+C to stop\n")
     
     app.run(host=host, port=port, debug=False)
 
